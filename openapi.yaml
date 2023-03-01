@@ -1,0 +1,214 @@
+swagger: '2.0'
+info:
+  title: demo-edm-cloudrun-beta #CLOUD_RUN_SERVICE_NAME 
+  description: demo-edm-cloudrun-beta #CLOUD_RUN_SERVICE_NAME 
+  version: 1.0.0
+host:  demo-edm-cloudrun-beta-esp-ovam5a2goq-ew.a.run.app # ESP_HOSTNAME
+x-google-endpoints:
+  - name:  demo-edm-cloudrun-beta-esp-ovam5a2goq-ew.a.run.app #ESP_HOSTNAME
+    allowCors: True
+schemes:
+  - https
+produces:
+  - application/json
+x-google-backend:
+  address:  https://demo-edm-cloudrun-beta-ovam5a2goq-ew.a.run.app #CLOUD_RUN_URL
+
+paths:
+  /health:
+    get:
+      summary: Get the status of health
+      operationId: health
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      security:
+        - api_key: [ ]
+
+  /login:
+    post:
+      summary: Log a user in
+      operationId: login
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      security:
+        - api_key: [ ]
+
+
+  /user:
+    get:
+      summary: Get user info
+      operationId: user_info
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+
+  /logout:
+    post:
+      summary: Log a user out
+      operationId: logout
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      security:
+        # - api_key: []
+        - edm_jwt: []
+
+  /api/v1/service/send/sendJsons:
+    post:
+      summary: send all jsons found in processed bucket to e-sight
+      operationId: send_all_jsons 
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      security:
+        - api_key: [ ]
+        # - edm_jwt: [ ]
+
+  /api/v1/service/send/sendJson/{file_name}:
+    get:
+      summary: send a file or more with a specific prefix to e-sight
+      operationId: send_json
+      parameters:
+        - in: path
+          name: file_name
+          type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      security:
+        - api_key: [ ]
+        # - edm_jwt: [ ]
+
+  /api/v1/service/receive/errorjson:
+    post:
+      summary: receive error json from e-sight
+      operationId: receive_error_json_from_e_sight 
+      parameters:
+        - name: Error
+          in: body
+          description: add the e-sight error report for a previous data sending
+          schema:
+            $ref: '#/definitions/Error'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      security:
+        # - api_key: [ ]
+        - edm_jwt: [ ]
+  
+  /api/v1/management/users/user:
+    post:
+      summary: create a new user on backoffice_users table
+      operationId: create_user
+      parameters:
+        - name: NewUser
+          in: body
+          description: data to create a new users, i.e. username, password
+          schema:
+            $ref: '#/definitions/NewUser'      
+      responses:
+        '201':
+          description: New user created
+          schema:
+            type: string
+        '200':
+          description: User already exists
+          schema:
+            type: string
+        
+      security:
+        # - api_key: [ ]
+        - edm_jwt: [ ]    
+
+  /api/v1/management/users/user/edit/{id}:
+    patch:
+      summary: modify user on backoffice_users table
+      operationId: modify_user
+      parameters:
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true     
+      responses:
+        '200':
+          description: User modified
+          schema:
+            type: string
+        
+      security:
+        # - api_key: [ ]
+        - edm_jwt: [ ]  
+
+  /api/v1/management/users/user/deactivate/{id}:
+    delete:
+      summary: deactivate user on backoffice_users table
+      operationId: deactivate_user
+      parameters:
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true     
+      responses:
+        '200':
+          description: User deactivated
+          schema:
+            type: string
+        
+      security:
+        # - api_key: [ ]
+        - edm_jwt: [ ] 
+
+security:
+  - api_key: [ ]
+  - edm_jwt: [ ]
+
+definitions:
+    # for /api/v1/service/receive/errorjson
+    Error:
+      type: object
+      
+    NewUser:
+      type: object
+      # required:
+      #  - _id
+      #  - header
+      #  - errors
+      # properties:
+      #   _id:
+      #     type: array
+      #   header:
+      #     type: object
+      #   errors:
+      #     type: list
+
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: key
+    in: query
+  edm_jwt:
+    authorizationUrl: ""
+    flow: implicit
+    type: oauth2
+    x-google-issuer: cloudbuild@$_PROJECT_ID.iam.gserviceaccount.com #SERVICE_ACCOUNT_JWT_EMAIL
+    x-google-jwks_uri: https://www.googleapis.com/service_accounts/v1/jwk/cloudbuild@$_PROJECT_ID.iam.gserviceaccount.com #SERVICE_ACCOUNT_JWT_EMAIL
+    x-google-audiences: demo-edm-cloudrun-beta-esp-ovam5a2goq-ew.a.run.app #ESP_HOSTNAME

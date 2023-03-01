@@ -1,0 +1,54 @@
+steps:
+
+  # Build Service Image
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "gcr.io/$_PROJECT_ID/$_REPO_NAME", "."]
+  
+  # Push Service Image
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$_PROJECT_ID/$_REPO_NAME"]
+
+  # Deploy Service Image
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [ "run", "deploy", "edm-terraformed-2",
+        "--image", "gcr.io/$_PROJECT_ID/$_REPO_NAME",
+        "--region", "$_REGION",
+        "--platform", "managed",
+        "--memory", "16Gi",
+        "--cpu", "4",
+        "--add-cloudsql-instances", "$_CLOUD_SQL_INSTANCE_CONNECTION_NAME",
+        "--project", "$_PROJECT_ID",
+        "--service-account", "$_SERVICE_ACCOUNT",
+        "--set-env-vars", "_ESP_URL=$_ESP_URL,_PROJECT_ID=$_PROJECT_ID,_SERVICE_ACCOUNT_JWT_SECRET=$_SERVICE_ACCOUNT_JWT_SECRET,_CLOUD_SQL_INSTANCE_CONNECTION_NAME=$_CLOUD_SQL_INSTANCE_CONNECTION_NAME,_MAIN_DB_SECRET=$_MAIN_DB_SECRET,_ERROR_DESTINATION_BUCKET_NAME=$_ERROR_DESTINATION_BUCKET_NAME,_RESPONSE_ERROR_DESTINATION_BUCKET_NAME=$_RESPONSE_ERROR_DESTINATION_BUCKET_NAME,_S_ERROR_DESTINATION_PATH=$_S_ERROR_DESTINATION_PATH,_SOURCE_BUCKET_NAME=$_SOURCE_BUCKET_NAME,_SUCCESS_DESTINATION_BUCKET_NAME=$_SUCCESS_DESTINATION_BUCKET_NAME,_DATASET=$_DATASET,_TABLE_RECEIVE=$_TABLE_RECEIVE,_TABLE_RECEIVE_ERROR=$_TABLE_RECEIVE_ERROR,_TABLE_SEND=$_TABLE_SEND,_TABLE_SEND_ERROR=$_TABLE_SEND_ERROR,_USERNAME=$_USERNAME,_CLOUD_RUN_URL=$_CLOUD_RUN_URL,_GET_ACCESS_TOKEN=$_GET_ACCESS_TOKEN,_GET_METER_ID=$_GET_METER_ID,_GET_SITE_ID=$_GET_SITE_ID,_PASSWORD=$_PASSWORD,_POST_JSON_CONSUMPTION=$_POST_JSON_CONSUMPTION,_POST_PASSWORD=$_POST_PASSWORD,_POST_USER=$_POST_USER,_R_ERROR_DESTINATION_PATH=$_R_ERROR_DESTINATION_PATH",
+        "--labels","team=techedge"
+      ]
+
+  # Deploy ESP
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [ "run", "deploy", "edm-terraformed-esp-2",
+        "--image", "gcr.io/$_PROJECT_ID/endpoints-release/endpoints-runtime-serverless",
+        "--allow-unauthenticated",
+        "--region", "$_REGION",
+        "--project", "$_PROJECT_ID",
+        "--service-account", "$_SERVICE_ACCOUNT",
+        "--platform", "managed",
+        "--labels","team=techedge",
+         "--set-env-vars", "ENDPOINTS_SERVICE_NAME=$_ESP_URL"
+         
+      ] #https://cloud.google.com/endpoints/docs/openapi/specify-esp-v2-startup-options#cloud_run_for_serverless_platforms
+
+  # Deploy Endpoints
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ["endpoints", "services", "deploy", "openapi.yaml", "--project", "$_PROJECT_ID"]
+    #test 2
+   # Enable API
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [ "services", "enable", "$_ESP_URL"]
+##testtrigger
+images:
+  - gcr.io/$_PROJECT_ID/$_REPO_NAME
+
+options:
+  logging: CLOUD_LOGGING_ONLY

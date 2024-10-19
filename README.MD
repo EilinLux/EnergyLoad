@@ -116,16 +116,9 @@ This service uses OpenAPI Specification v2.0 to define its API. The swagger.yaml
 * Authentication: Some endpoints require API keys (api_key) while others use JWT authentication (edm_jwt).
 * Error Handling: The /api/v1/service/receive/errorjson endpoint allows e-Sight to report errors encountered during data processing.
 
-##### 3.1.2 Load Balancer & Cloud Armor
 
 
-
-**Load Balancer**. A load balancer distributes user traffic across multiple instances of your applications. By spreading the load, load balancing reduces the risk that your applications experience performance issues. 
-
-**Google Cloud Armor**. Google Cloud Armor is an enterprise-grade DDoS defence service and Web Application Firewall. That means that it can help protect HTTP-frontend applications from both targeted and distributed denial of service attacks. 
-
-
-##### 3.1.3 Cloud Endpoints & Extensible Service Proxy V2 (ESPv2)
+##### Cloud Endpoints & Extensible Service Proxy V2 (ESPv2)
 
 **Cloud Endpoints**. For security reasons a Cloud Endpoints service was implemented as API management system to secure, monitor, analyze, and set quotas on APIs. Indeed, access control is the most important reason for implementing it, since Cloud Endpoints resource manages who has access to an API as well as establishing rules around how data requests are handled. Cloud Endpoints uses the Extensible Service Proxy V2 (ESPv2) as an API gateway
 
@@ -154,19 +147,27 @@ Extensible Service Proxy V2 (ESPv2) is an Envoy-based proxy, an open-source edge
 
 **OpenAPI specification**. Endpoints configurations requires to write version 2 OpenAPI Specification, formerly known as the Swagger spec and currently addressed as the industry standard for defining REST APIs. The definitions are written in a .yaml file which describes the openapi version (swagger: '2.0'), the backend service (```x-google-backend```) and any authentication requirements (at the individual api level or at service level).
 
+### API Hardening
 
+This service incorporates multiple layers of security to protect the APIs and ensure authorized access.
 
-### 3.2 Overview on hardening APIs
+#### Load Balancing and DDoS Protection
 
+- **Load Balancer:** Distributes incoming traffic across multiple instances of the application to prevent performance issues and ensure high availability.
+- **Cloud Armor:** Provides robust defense against DDoS attacks, safeguarding the service from disruption.
 
+#### Authentication and Authorization
 
-In addition to the already mentioned service Cloud Amour and Load Balancer, the architecture offers the following hardening feaures: the mandatory usage of APIKey in every API call, the mandatory usage of a JSON Web Token in every API call (except ```/login```), a system of roles to restrict the APIs access based on user type.
+To further enhance security, the following measures are implemented:
 
+- **API Keys:** Each API call requires an API key for authentication. This key is generated in the GCP Credentials section and is associated with each service.
+- **JWT (JSON Web Token):**  Except for the `/login` endpoint, all API calls require a valid JWT for authorization. This adds an extra layer of security by verifying user identity.
+- **Role-Based Access Control:** A system of roles restricts API access based on user type, ensuring that users only have access to the resources they need.
 
+#### API Key Enforcement
 
-##### 3.2.1 APIkey.
+API key enforcement is implemented through the OpenAPI specification. The following snippet is added to each API path definition to require an API key:
 
-An application programming interface (API) key is a code used to identify an application or user and is used for authentication in computer applications. In the architecture an Apikey is generated in the Credentials sections on GCP and is associated to each service (the one for sending and the one for receiving). The mandatory usage of APIkey was added to all the APIs call using the OpenAPI specification, in particular by adding to each path the following:
 
 ```
     security:
@@ -210,7 +211,7 @@ This is a JSON file which contains the following information.
 In the pre-dev, this was done using the App Engine default service account and the APIKEY was used to authenticate as follow: ```https://service.com/login?key=APIKEY```. The whole file was saved to Secret Manager, as ```_SERVICE_ACCOUNT_JWT_SECRET```.
 
 
-##### 3.2.2 JSON Web Token (JWT).
+##### JSON Web Token (JWT).
 In addition to an ApiKey, except for the ```/login``` API, every other API request requires an additional level of security, ie. a JSON Web Token (JWT). A JWT is open and standard RFC 7519, used to identify a user without having to send private credentials on every request.
 
 In both the edm-sight-send-apis and the edm-sight-receive-apis CloudRun:
@@ -220,10 +221,9 @@ In both the edm-sight-send-apis and the edm-sight-receive-apis CloudRun:
 
 
 
-#####  3.1.5 MySQL Database.
+#####  MySQL Database.
 
 Following Security requirements, a separated database to monitor access to and store Credentials and Roles for the APIs was implemented. The service chosen on GCP was Cloud SQL which manage relational data for MySQL, PostgreSQL, and SQL Server.
-
 
 Monitoring access to the API. To monitor the access to the APIs a log table has been created on a MySQL DB, called edm-cloudmysql-instance. The following events are logged to the table:
 
@@ -250,10 +250,12 @@ MANUAL IMPLEMENTATION. Even though in dev and production environment the service
 
 1)	Created a MySQL instance manually using the user-interface (UI). The minimum required parameter to set are
 
-    ```Name: edm-cloudmysql-instance```
-   ``` Password: EDM-password!```
-    ```Config: Deployment```
-    ```Region: Europe-west1```
+   ```
+    Name: edm-cloudmysql-instance
+    Password: EDM-password!
+    Config: Deployment
+    Region: Europe-west1
+    ```
 
 
 2)	Enable Cloud SQL admin API

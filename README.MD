@@ -221,11 +221,11 @@ In both the edm-sight-send-apis and the edm-sight-receive-apis CloudRun:
 
 
 
-#####  MySQL Database.
+##### MySQL Database.
 
 Following Security requirements, a separated database to monitor access to and store Credentials and Roles for the APIs was implemented. The service chosen on GCP was Cloud SQL which manage relational data for MySQL, PostgreSQL, and SQL Server.
 
-Monitoring access to the API. To monitor the access to the APIs a log table has been created on a MySQL DB, called edm-cloudmysql-instance. The following events are logged to the table:
+**Monitoring access to the API**. To monitor the access to the APIs a log table has been created on a MySQL DB, called edm-cloudmysql-instance. The following events are logged to the table:
 
 * a) successful logins (log-in and out)
 
@@ -246,7 +246,7 @@ And for each logged event the following data are collected:
 * e)	user ID
 
 
-MANUAL IMPLEMENTATION. Even though in dev and production environment the service was terraformed, in the pre-dev environment the following manual steps were required:
+**Manual Implementation**. Even though in dev and production environment the service was terraformed, in the pre-dev environment the following manual steps were required:
 
 1)	Created a MySQL instance manually using the user-interface (UI). The minimum required parameter to set are
 

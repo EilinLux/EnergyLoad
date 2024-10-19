@@ -211,7 +211,7 @@ This is a JSON file which contains the following information.
 In the pre-dev, this was done using the App Engine default service account and the APIKEY was used to authenticate as follow: ```https://service.com/login?key=APIKEY```. The whole file was saved to Secret Manager, as ```_SERVICE_ACCOUNT_JWT_SECRET```.
 
 
-##### JSON Web Token (JWT).
+#### JSON Web Token (JWT).
 In addition to an ApiKey, except for the ```/login``` API, every other API request requires an additional level of security, ie. a JSON Web Token (JWT). A JWT is open and standard RFC 7519, used to identify a user without having to send private credentials on every request.
 
 In both the edm-sight-send-apis and the edm-sight-receive-apis CloudRun:
@@ -221,7 +221,7 @@ In both the edm-sight-send-apis and the edm-sight-receive-apis CloudRun:
 
 
 
-##### MySQL Database.
+#### MySQL Database.
 
 Following Security requirements, a separated database to monitor access to and store Credentials and Roles for the APIs was implemented. The service chosen on GCP was Cloud SQL which manage relational data for MySQL, PostgreSQL, and SQL Server.
 

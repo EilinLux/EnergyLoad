@@ -3,6 +3,7 @@
 This repository contains a Python service designed to run on Google Cloud Run. It facilitates the secure and reliable transfer of data to E-sight, an external service. The service includes APIs for sending data, receiving error messages, and managing API access (login, logout, user creation/modification).
 
 
+
 ### Structure
 
 The repository is organized as follows:
@@ -39,7 +40,22 @@ The repository is organized as follows:
 - `cloudbuild.yaml`:  Cloud Build configuration for standard deployments.
 - `gcloud_build_image`:  Script to build the Docker image using gcloud.
 
-### Deployment
+
+### Usage
+
+This section provides instructions on how to run the service on Cloud Run and interact with its APIs.
+
+#### Prerequisites
+
+Before deploying and using the service, ensure you have the following:
+
+- **Google Cloud Project:** A Google Cloud project with billing enabled.
+- **gcloud CLI:** The gcloud command-line tool installed and configured with your project.
+- **Docker:** Docker installed and running on your local machine.
+- **Service Account:** A service account with the necessary permissions to deploy to Cloud Run and access other GCP resources (e.g., Cloud SQL, Cloud Storage).
+
+
+#### Deployment
 
 This service is deployed to Cloud Run using Cloud Build. The `cloudbuild.yaml` file defines the build and deployment steps.
 
